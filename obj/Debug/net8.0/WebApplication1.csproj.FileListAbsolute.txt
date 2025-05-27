@@ -37,3 +37,4 @@ C:\Users\Danilo\source\repos\WebApplication1\WebApplication1\bin\Debug\net8.0\Ex
 C:\Users\Danilo\source\repos\WebApplication1\WebApplication1\bin\Debug\net8.0\RBush.dll
 C:\Users\Danilo\source\repos\WebApplication1\WebApplication1\bin\Debug\net8.0\SixLabors.Fonts.dll
 C:\Users\Danilo\source\repos\WebApplication1\WebApplication1\bin\Debug\net8.0\System.IO.Packaging.dll
+C:\Users\Danilo\source\repos\WebApplication1\WebApplication1\obj\Debug\net8.0\WebApplication1.sourcelink.json
