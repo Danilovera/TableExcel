@@ -16,10 +16,12 @@ namespace WebApplication1.Services
             // Agrega una hoja llamada "DailyLogs"
             var worksheet = workbook.Worksheets.Add("DailyLogs");
 
+          
+
             #region Text Principal
             // Combina las celdas desde la columna E hasta la I en la fila 5 (E5:I5)
             var mergedRange = worksheet.Range("E5:I5").Merge();
-            
+
             // Establece el texto dentro de la celda combinada
             mergedRange.Value = "SERGIO MERCADO GONZALEZ";
 
@@ -73,6 +75,159 @@ namespace WebApplication1.Services
             }
             #endregion
 
+            //
+            #region
+            var bitacoraCell = worksheet.Cell("L6");
+            bitacoraCell.Value = "BITACORA";
+
+            // Bordes negros alrededor de la celda
+            bitacoraCell.Style.Border.TopBorder = XLBorderStyleValues.Thin;
+            bitacoraCell.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+            bitacoraCell.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+            bitacoraCell.Style.Border.RightBorder = XLBorderStyleValues.Thin;
+
+            bitacoraCell.Style.Border.TopBorderColor = XLColor.Black;
+            bitacoraCell.Style.Border.BottomBorderColor = XLColor.Black;
+            bitacoraCell.Style.Border.LeftBorderColor = XLColor.Black;
+            bitacoraCell.Style.Border.RightBorderColor = XLColor.Black;
+
+            var cellK6 = worksheet.Cell("K6");
+            cellK6.Value = ""; // Para que la celda exista
+            cellK6.Style.Border.RightBorder = XLBorderStyleValues.Thin;
+            cellK6.Style.Border.RightBorderColor = XLColor.Black;
+
+            // Centrar el texto
+            bitacoraCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            bitacoraCell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            //negrilla del texto
+            bitacoraCell.Style.Font.Bold = true;
+            #endregion
+
+            #region
+            var cellM6 = worksheet.Cell("M6");
+            cellM6.Value = "105-084";
+
+            // Aplicar estilo
+            cellM6.Style.Font.Bold = true;
+            cellM6.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cellM6.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            // Bordes negros
+            cellM6.Style.Border.TopBorder = XLBorderStyleValues.Thin;
+            cellM6.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+            cellM6.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+            cellM6.Style.Border.RightBorder = XLBorderStyleValues.Thin;
+
+            cellM6.Style.Border.TopBorderColor = XLColor.Black;
+            cellM6.Style.Border.BottomBorderColor = XLColor.Black;
+            cellM6.Style.Border.LeftBorderColor = XLColor.Black;
+            cellM6.Style.Border.RightBorderColor = XLColor.Black;
+
+            //borde derecho een negro
+
+            var cellN6 = worksheet.Cell("N6");
+            cellN6.Value = ""; // Para que la celda exista
+            cellN6.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+            cellN6.Style.Border.LeftBorderColor = XLColor.Black;
+
+            #endregion
+
+            #region
+            // Establecer "Fecha" en L7 con estilo y bordes
+            var cellL7 = worksheet.Cell("L7");
+            cellL7.Value = "Fecha";
+
+            // Negrilla
+            cellL7.Style.Font.Bold = true;
+
+            // Centrado horizontal y vertical
+            cellL7.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cellL7.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            // Borde negro completo para L7
+            cellL7.Style.Border.TopBorder = XLBorderStyleValues.Thin;
+            cellL7.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+            cellL7.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+            cellL7.Style.Border.RightBorder = XLBorderStyleValues.Thin;
+
+            cellL7.Style.Border.TopBorderColor = XLColor.Black;
+            cellL7.Style.Border.BottomBorderColor = XLColor.Black;
+            cellL7.Style.Border.LeftBorderColor = XLColor.Black;
+            cellL7.Style.Border.RightBorderColor = XLColor.Black;
+
+            // También pintar el borde derecho de K7 (para que se note que está pegada a L7)
+            var cellK7 = worksheet.Cell("K7");
+            cellK7.Style.Border.RightBorder = XLBorderStyleValues.Thin;
+            cellK7.Style.Border.RightBorderColor = XLColor.Black;
+            #endregion
+
+            #region Fecha en M7
+
+            // Establecer "28/02/2025" en M7
+            var cellM7 = worksheet.Cell("M7");
+            cellM7.Value = "28/02/2025";
+
+            // Opcional: puedes formatear la celda como fecha
+            cellM7.Style.DateFormat.Format = "dd/MM/yyyy";
+
+            // Negrilla
+            cellM7.Style.Font.Bold = true;
+
+            // Centrado
+            cellM7.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cellM7.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            // Borde negro completo
+            cellM7.Style.Border.TopBorder = XLBorderStyleValues.Thin;
+            cellM7.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+            cellM7.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+            cellM7.Style.Border.RightBorder = XLBorderStyleValues.Thin;
+
+            cellM7.Style.Border.TopBorderColor = XLColor.Black;
+            cellM7.Style.Border.BottomBorderColor = XLColor.Black;
+            cellM7.Style.Border.LeftBorderColor = XLColor.Black;
+            cellM7.Style.Border.RightBorderColor = XLColor.Black;
+
+            // Pintar borde izquierdo de la celda N7
+            var cellN7 = worksheet.Cell("N7");
+            cellN7.Value = " "; // Espacio en blanco
+            cellN7.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+            cellN7.Style.Border.LeftBorderColor = XLColor.Black;
+
+            #endregion
+
+            #region ajuste tamano de columnas
+          //  double anchoPorDefecto = 8.43;
+
+            foreach (var column in worksheet.ColumnsUsed())
+            {
+                // Guardar el ancho actual
+                double anchoOriginal = column.Width;
+
+                // Ajustar al contenido
+                column.AdjustToContents();
+
+                // Si el nuevo ancho es menor que el original, lo dejamos como estaba
+                if (column.Width < anchoOriginal)
+                {
+                    column.Width = anchoOriginal;
+                }
+            }
+            #endregion
+
+            #region
+            // Escribir el texto
+            string texto = "CHEQUE: 'C'; DEPOSITO: 'D'; EFECTIVO: 'E'; SINPE MOVIL: 'S'; TRANSFERENCIA: 'T'; VOUCHER´S: 'V'";
+            var rango = worksheet.Range("C9:M9").Merge();
+
+            // Establecer el valor
+            rango.Value = texto;
+
+            // Aplicar estilo: negrita y bordes
+            rango.Style.Font.Bold = true;
+           
+            #endregion
 
             // Guardar el libro en un stream de memoria
             using var stream = new MemoryStream();
