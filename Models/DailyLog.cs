@@ -37,7 +37,9 @@ namespace WebApplication1.Models
             DateTime dailyLogDate,
             string? phoneNumber = null,
             string? licensePlate = null,
-            string? chargeDay = null)
+            string? chargeDay = null )
+             
+
         {
             ReceiptNumber = receiptNumber;
             Code = code;

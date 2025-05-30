@@ -215,7 +215,7 @@ namespace WebApplication1.Services
             #endregion
 
             #region Colorear encabezado doble fila B10:P11
-            var rangoColoreado = worksheet.Range("B10:P11");
+            var rangoColoreado = worksheet.Range("B10:O11");
             rangoColoreado.Style.Fill.BackgroundColor = XLColor.FromHtml("#b0c4de");
             #endregion
 
@@ -424,9 +424,21 @@ namespace WebApplication1.Services
             rangoM10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
 
-            //O10-O11
+            //n10-O11
+            var rangoN10_11 = worksheet.Range("N10:N11").Merge();
+            rangoN10_11.Value = "TELEFONOS";
+            rangoN10_11.Style.Font.Bold = true;
+            rangoN10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            rangoN10_11.Style.Border.OutsideBorderColor = XLColor.Black;
+            rangoN10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            rangoN10_11.Style.Border.InsideBorderColor = XLColor.Black;
+
+            rangoN10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            rangoN10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            //O10-P11
             var rangoO10_11 = worksheet.Range("O10:O11").Merge();
-            rangoO10_11.Value = "TELEFONOS";
+            rangoO10_11.Value = "CARGO MANUAL";
             rangoO10_11.Style.Font.Bold = true;
             rangoO10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
             rangoO10_11.Style.Border.OutsideBorderColor = XLColor.Black;
@@ -436,68 +448,134 @@ namespace WebApplication1.Services
             rangoO10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             rangoO10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
-            //P10-P11
-            var rangoP10_11 = worksheet.Range("P10:P11").Merge();
-            rangoP10_11.Value = "CARGO MANUAL";
-            rangoP10_11.Style.Font.Bold = true;
-            rangoP10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangoP10_11.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangoP10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangoP10_11.Style.Border.InsideBorderColor = XLColor.Black;
-
-            rangoP10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangoP10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
             //
             int filaInicioDaily = 12;
-
             foreach (var item in GetDailyLogs()
-             .Where(item => item.TransactionType != "SOBRANTE" &&
-                            item.TransactionType != "AMPLIACION DE VIGENCIA RT"))
+                .Where(item => item.TransactionType != "SOBRANTE" &&
+                               item.TransactionType != "AMPLIACION DE VIGENCIA RT"))
             {
                 worksheet.Cell(filaInicioDaily, "B").Value = item.ReceiptNumber;
                 worksheet.Cell(filaInicioDaily, "C").Value = item.Code.StartsWith("EMISION") ? " " : item.Code;
                 worksheet.Cell(filaInicioDaily, "D").Value = item.InsuranceType;
                 worksheet.Cell(filaInicioDaily, "E").Value = item.From.ToString("dd/MM/yyyy");
                 worksheet.Cell(filaInicioDaily, "F").Value = item.To.ToString("dd/MM/yyyy");
-                worksheet.Cell(filaInicioDaily, "G").Value = item.Amount;
-                
-                // Obtener la primera cifra del monto decimal como string
                 var PaymentMethodStr = item.PaymentMethod.ToString();
                 worksheet.Cell(filaInicioDaily, "H").Value =
-                !string.IsNullOrEmpty(PaymentMethodStr) ? PaymentMethodStr[0].ToString() : "";
+                    !string.IsNullOrEmpty(PaymentMethodStr) ? PaymentMethodStr[0].ToString() : "";
 
-             
-                // Obtener solo los números de item.Amount (ej. "V-0988" -> "0988")
-                string amountCode = item.PaymentMethod; // Asegúrate de que item.Amount sea string
+                string amountCode = item.PaymentMethod;
                 string numericOnly = Regex.Replace(amountCode ?? "", @"[^\d]", "");
-
                 worksheet.Cell(filaInicioDaily, "I").Value = numericOnly;
-
                 worksheet.Cell(filaInicioDaily, "J").Value = item.TransactionType;
-                //
-
                 worksheet.Cell(filaInicioDaily, "K").Value = item.InsuredFullName;
                 worksheet.Cell(filaInicioDaily, "L").Value = item.LicensePlate;
                 worksheet.Cell(filaInicioDaily, "M").Value = item.Identification;
-                worksheet.Cell(filaInicioDaily, "O").Value = string.IsNullOrEmpty(item.PhoneNumber) ? string.Empty : item.PhoneNumber;
-                worksheet.Cell(filaInicioDaily, "N").Value = string.IsNullOrEmpty(item.ChargeDay) ? string.Empty : item.ChargeDay;
+                worksheet.Cell(filaInicioDaily, "N").Value = string.IsNullOrEmpty(item.PhoneNumber) ? string.Empty : item.PhoneNumber;
+                worksheet.Cell(filaInicioDaily, "O").Value = item.ChargeDay;
 
+                // Aplicar borde negro a toda la fila de la B a la O
+                var range = worksheet.Range($"B{filaInicioDaily}:O{filaInicioDaily}");
+                range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                range.Style.Border.OutsideBorderColor = XLColor.Black;
+                range.Style.Border.InsideBorderColor = XLColor.Black;
+
+                // Columna G - Monto en colones
+                var celdaColones = worksheet.Cell(filaInicioDaily, "G");
+                celdaColones.Value = item.Amount;
+                celdaColones.Style.NumberFormat.Format = "₡ #,##0.00";
                 filaInicioDaily++;
             }
-                            
 
-            var rangoPrueba = worksheet.Range($"P{filaInicioDaily}:P{filaInicioDaily + 1}").Merge();
-            rangoPrueba.Value = "CARGO MANUAL";
+
+            // Cheques
+            int filaAnterior = filaInicioDaily - 1;
+            var celdaExtra = worksheet.Cell(filaInicioDaily, "G");
+            celdaExtra.FormulaA1 = $"=SUM(G12:G{filaAnterior})";
+            celdaExtra.Style.Fill.BackgroundColor = XLColor.Orange;
+            celdaExtra.Style.NumberFormat.Format = "₡ #,##0.00";
+            var rangoPrueba = worksheet.Cell(filaInicioDaily, "B");
+            rangoPrueba.Value = "CHEQUES:";
             rangoPrueba.Style.Font.Bold = true;
+
+
+            // Aplicar bordes negros a toda la fila (de B a P)
+            var rangoFilaExtra = worksheet.Range($"B{filaInicioDaily}:O{filaInicioDaily}");
+            rangoFilaExtra.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            rangoFilaExtra.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            rangoFilaExtra.Style.Border.OutsideBorderColor = XLColor.Black;
+            rangoFilaExtra.Style.Border.InsideBorderColor = XLColor.Black;
+
+            // Lista de valores que irán en la columna B
+            var conceptos = new List<string>
+{
+    "DEPOSITOS:",
+    "EFECTIVO:",
+    "SINPE MOVIL:",
+    "TRANSF. ELECT.",
+    "VOUCHER´S:"
+};
+
+            // Empezamos desde una fila debajo de "CHEQUES:"
+            int filaBase = filaInicioDaily + 1;
+
+            // Recorrer cada concepto y dibujar fila con estilo
+            foreach (var text in conceptos)
+            {
+                var celdaTexto = worksheet.Cell(filaBase, "B");
+                celdaTexto.Value = text;
+                celdaTexto.Style.Font.Bold = true;
+
+                var celdaValor = worksheet.Cell(filaBase, "C");
+
+                if (text == "DEPOSITOS:" || text == "TRANSF. ELECT.")
+                {
+                    celdaTexto.Style.Fill.BackgroundColor = XLColor.FromArgb(191, 191, 191);
+                    celdaValor.Style.Fill.BackgroundColor = XLColor.FromArgb(191, 191, 191);
+                }
+
+                var rangoFila = worksheet.Range($"B{filaBase}:C{filaBase}");
+                rangoFila.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                rangoFila.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                rangoFila.Style.Border.OutsideBorderColor = XLColor.Black;
+                rangoFila.Style.Border.InsideBorderColor = XLColor.Black;
+
+                filaBase++; // Avanzar a la siguiente fila
+
+                // Insertar después de "VOUCHER´S:"
+                if (text == "VOUCHER´S:")
+                {
+                    // Fila con una celda en B
+                    var celdaExtra1 = worksheet.Cell(filaBase, "B");
+                    celdaExtra1.Value = "TRAMITES SIN DINERO";
+                    celdaExtra1.Style.Font.Bold = true;
+                    celdaExtra1.Style.Fill.BackgroundColor = XLColor.FromArgb(191, 191, 191);
+                    celdaExtra1.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    filaBase++;
+
+                    // Dos filas con tres celdas (B, C, D)
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var range = worksheet.Range($"B{filaBase}:D{filaBase}");
+                        range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                        range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                        range.Style.Border.OutsideBorderColor = XLColor.Black;
+                        range.Style.Border.InsideBorderColor = XLColor.Black;
+                        filaBase++;
+                    }
+                }
+            }
+
 
             #endregion
             #region Auto‑ajuste de ancho de columnas
             // Ajusta el ancho de TODAS las columnas que tienen contenido
             worksheet.ColumnsUsed().AdjustToContents();
-// Si quieres abarcar incluso aquellas columnas que no aparecen en ColumnsUsed():
-// worksheet.Columns(1, worksheet.LastColumnUsed().ColumnNumber()).AdjustToContents();
-#endregion
+            worksheet.Column("G").Width= 15;
+            worksheet.Column("O").Width = 15;
+            // Si quieres abarcar incluso aquellas columnas que no aparecen en ColumnsUsed():
+            // worksheet.Columns(1, worksheet.LastColumnUsed().ColumnNumber()).AdjustToContents();
+            #endregion
             // Guardar el libro en un stream de memoria
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);
