@@ -1,13 +1,24 @@
 ﻿using ClosedXML.Excel;
 using ClosedXML.Excel.Drawings;
 using DocumentFormat.OpenXml.Drawing;
+using System.Net;
 using System.Text.RegularExpressions;
 using WebApplication1.Interfaces;
 using WebApplication1.Models;
 
 
 namespace WebApplication1.Services
-{
+{ 
+    public static class DailyLogExtensions
+    {
+        public static decimal GetSum(this List<DailyLog> dailylogs, string initial)
+        {
+            return dailylogs
+                .Where(x => x.PaymentMethod.StartsWith(initial))
+                .Sum(x => x.Amount);
+        }
+    }
+
     public class ExcelService : IExcelService
     {
         public Task<byte[]> ReturnExcelFile()
@@ -450,6 +461,8 @@ namespace WebApplication1.Services
 
             //
             int filaInicioDaily = 12;
+            decimal totalColones = 0; // Aquí se guardará la suma de todos los montos en colones
+
             foreach (var item in GetDailyLogs()
                 .Where(item => item.TransactionType != "SOBRANTE" &&
                                item.TransactionType != "AMPLIACION DE VIGENCIA RT"))
@@ -461,7 +474,7 @@ namespace WebApplication1.Services
                 worksheet.Cell(filaInicioDaily, "F").Value = item.To.ToString("dd/MM/yyyy");
                 var PaymentMethodStr = item.PaymentMethod.ToString();
                 worksheet.Cell(filaInicioDaily, "H").Value =
-                    !string.IsNullOrEmpty(PaymentMethodStr) ? PaymentMethodStr[0].ToString() : "";
+                !string.IsNullOrEmpty(PaymentMethodStr) ? PaymentMethodStr[0].ToString() : "";
 
                 string amountCode = item.PaymentMethod;
                 string numericOnly = Regex.Replace(amountCode ?? "", @"[^\d]", "");
@@ -484,20 +497,20 @@ namespace WebApplication1.Services
                 var celdaColones = worksheet.Cell(filaInicioDaily, "G");
                 celdaColones.Value = item.Amount;
                 celdaColones.Style.NumberFormat.Format = "₡ #,##0.00";
+
+
+                // Acumular el monto
+                totalColones += item.Amount;
                 filaInicioDaily++;
+
+              
             }
 
-
-            // Cheques
-            int filaAnterior = filaInicioDaily - 1;
-            var celdaExtra = worksheet.Cell(filaInicioDaily, "G");
-            celdaExtra.FormulaA1 = $"=SUM(G12:G{filaAnterior})";
-            celdaExtra.Style.Fill.BackgroundColor = XLColor.Orange;
-            celdaExtra.Style.NumberFormat.Format = "₡ #,##0.00";
-            var rangoPrueba = worksheet.Cell(filaInicioDaily, "B");
-            rangoPrueba.Value = "CHEQUES:";
-            rangoPrueba.Style.Font.Bold = true;
-
+            // Escribir el total en la celda justo debajo de la última fila en la columna G
+            var celdaTotalColones = worksheet.Cell(filaInicioDaily, "G");
+            celdaTotalColones.Value = totalColones;
+            celdaTotalColones.Style.Font.Bold = true;
+            celdaTotalColones.Style.NumberFormat.Format = "₡ #,##0.00";
 
             // Aplicar bordes negros a toda la fila (de B a P)
             var rangoFilaExtra = worksheet.Range($"B{filaInicioDaily}:O{filaInicioDaily}");
@@ -508,16 +521,17 @@ namespace WebApplication1.Services
 
             // Lista de valores que irán en la columna B
             var conceptos = new List<string>
-{
-    "DEPOSITOS:",
-    "EFECTIVO:",
-    "SINPE MOVIL:",
-    "TRANSF. ELECT.",
-    "VOUCHER´S:"
-};
+            {   "CHEQUES:",
+                "DEPOSITOS:",
+                "EFECTIVO:",
+                "SINPE MOVIL:",
+                "TRANSF. ELECT.",
+                "VOUCHER´S:"
+            };
 
-            // Empezamos desde una fila debajo de "CHEQUES:"
-            int filaBase = filaInicioDaily + 1;
+            // Empezamos desde una fila debajo"
+            int filaBase = filaInicioDaily ;
+            var dailyLogs = GetDailyLogs(); 
 
             // Recorrer cada concepto y dibujar fila con estilo
             foreach (var text in conceptos)
@@ -533,6 +547,10 @@ namespace WebApplication1.Services
                     celdaTexto.Style.Fill.BackgroundColor = XLColor.FromArgb(191, 191, 191);
                     celdaValor.Style.Fill.BackgroundColor = XLColor.FromArgb(191, 191, 191);
                 }
+
+                celdaValor.Value = dailyLogs.GetSum(text[..1]);
+
+             
 
                 var rangoFila = worksheet.Range($"B{filaBase}:C{filaBase}");
                 rangoFila.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
@@ -553,18 +571,43 @@ namespace WebApplication1.Services
                     celdaExtra1.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                     filaBase++;
 
-                    // Dos filas con tres celdas (B, C, D)
-                    for (int i = 0; i < 2; i++)
+                    if (text == "CHEQUES:")
                     {
+                        decimal sumaCheques = dailyLogs.GetSum("C");
+                        celdaValor.Value = sumaCheques;
+                        celdaValor.Style.NumberFormat.Format = "₡ #,##0.00";
+                    }
+
+                    // Dos filas con tres celdas (B, C, D)
+                    var valores = new List<(string B, string C, string D)>
+                     {
+                         ("POLIZA", "NOMBRE", "TRAMITE"),
+                         ("0204VIA0087142-00", "RODRIGUEZ RODRIGUEZ JORGE EDUARDO", "CARTA SOLICITUD RESERVA DE DINERO ")
+                     };
+                    int index = 0;
+                    foreach (var (B, C, D) in valores)
+                    {
+                        worksheet.Cell(filaBase, "B").Value = B;
+                        worksheet.Cell(filaBase, "C").Value = C;
+                        worksheet.Cell(filaBase, "D").Value = D;
+
                         var range = worksheet.Range($"B{filaBase}:D{filaBase}");
                         range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                         range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
                         range.Style.Border.OutsideBorderColor = XLColor.Black;
                         range.Style.Border.InsideBorderColor = XLColor.Black;
+
+                        if (index == 0) // Primera fila (jon, can, sal)
+                        {
+                            range.Style.Fill.BackgroundColor = XLColor.LightBlue; // Fondo azul claro
+                            range.Style.Font.Bold = true; // Negrita
+                        }
+
                         filaBase++;
+                        index++;
                     }
                 }
-            }
+                }
 
 
             #endregion
@@ -596,7 +639,6 @@ namespace WebApplication1.Services
 
             
         }
-
 
         private List<DailyLog> GetDailyLogs()
         {
@@ -633,6 +675,8 @@ namespace WebApplication1.Services
             };
         }
 
+
+
         private List<ProcedureWithoutMoney> GetProcedures()
         {
             return new List<ProcedureWithoutMoney>()
@@ -640,5 +684,6 @@ namespace WebApplication1.Services
                new ProcedureWithoutMoney("0204VIA0087142-00","RODRIGUEZ RODRIGUEZ JORGE EDUARDO","CARTA SOLICITUD RESERVA DE DINERO")
             };
         }
+
     }
 }
