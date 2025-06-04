@@ -58,7 +58,8 @@ namespace WebApplication1.Controllers
         {
             return new List<ProcedureWithoutMoney>()
             {
-               new ProcedureWithoutMoney("0204VIA0087142-00","RODRIGUEZ RODRIGUEZ JORGE EDUARDO","CARTA SOLICITUD RESERVA DE DINERO")
+               new ProcedureWithoutMoney("0204VIA0087142-00","RODRIGUEZ RODRIGUEZ JORGE EDUARDO","CARTA SOLICITUD RESERVA DE DINERO"), 
+                new ProcedureWithoutMoney("prueba2-00","RODRIGUEZ RODRIGUEZ JORGE EDUARDO","CARTA SOLICITUD RESERVA DE DINERO")
             };
         }
     }

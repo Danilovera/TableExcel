@@ -1,6 +1,7 @@
 ﻿using ClosedXML.Excel;
 using ClosedXML.Excel.Drawings;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -143,8 +144,8 @@ namespace WebApplication1.Services
             //E11
             worksheet.SetHeader("E11", "DE");
 
-            //F12
-            worksheet.SetHeader("f11", "HASTA");
+            //F11
+            worksheet.SetHeader("F11", "HASTA");
 
             //G10-G11
             worksheet.SetMergedHeader("G10:G11", "PRIMA");
@@ -226,6 +227,7 @@ namespace WebApplication1.Services
             celdaTotalColones.Value = totalColones;
             celdaTotalColones.Style.Font.Bold = true;
             celdaTotalColones.Style.NumberFormat.Format = "₡ #,##0.00";
+            celdaTotalColones.Style.Fill.BackgroundColor = XLColor.Orange;
 
             // Aplicar bordes negros a toda la fila (de B a P)
             var rangoFilaExtra = worksheet.Range($"B{filaInicioDaily}:O{filaInicioDaily}");
@@ -235,88 +237,73 @@ namespace WebApplication1.Services
             rangoFilaExtra.Style.Border.InsideBorderColor = XLColor.Black;
 
             // Lista de valores que irán en la columna B
-            var conceptos = new List<string>
-            {   "CHEQUES:",
-                "DEPOSITOS:",
-                "EFECTIVO:",
-                "SINPE MOVIL:",
-                "TRANSF. ELECT.",
-                "VOUCHER´S:"
+            var conceptos = new List<(string, XLColor)>
+            {   ("CHEQUES:", XLColor.FromArgb(191, 191, 191)),
+                ("DEPOSITOS:", XLColor.FromArgb(255, 255, 255)),
+                ("EFECTIVO:", XLColor.FromArgb(191, 191, 191)),
+                ("SINPE MOVIL:", XLColor.FromArgb(255, 255, 255)),
+                ("TRANSF. ELECT.", XLColor.FromArgb(191, 191, 191)),
+                ("VOUCHER´S:", XLColor.FromArgb(255, 255, 255))
             };
 
-            // Empezamos desde una fila debajo"
+            // Empezamos desde una fila debajo
             int filaBase = filaInicioDaily;
-
             // Recorrer cada concepto y dibujar fila con estilo
-            foreach (var text in conceptos)
-            {
+            foreach (var (text, color) in conceptos)
+            { //
                 var celdaTexto = worksheet.Cell(filaBase, "B");
                 celdaTexto.Value = text;
                 celdaTexto.Style.Font.Bold = true;
 
                 var celdaValor = worksheet.Cell(filaBase, "C");
-
-                if (text == "DEPOSITOS:" || text == "TRANSF. ELECT.")
-                {
-                    celdaTexto.Style.Fill.BackgroundColor = XLColor.FromArgb(191, 191, 191);
-                    celdaValor.Style.Fill.BackgroundColor = XLColor.FromArgb(191, 191, 191);
-                }
+                celdaTexto.Style.Fill.BackgroundColor = color;
+                celdaValor.Style.Fill.BackgroundColor = color;
 
                 celdaValor.Value = dailyLogs.ToList().GetSum(text[..1]);
+                celdaValor.Style.NumberFormat.Format = "₡ #,##0.00";
+
 
                 var rangoFila = worksheet.Range($"B{filaBase}:C{filaBase}");
-                rangoFila.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                rangoFila.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-                rangoFila.Style.Border.OutsideBorderColor = XLColor.Black;
-                rangoFila.Style.Border.InsideBorderColor = XLColor.Black;
+                rangoFila.ApplyHeaderStyle();
 
                 filaBase++; // Avanzar a la siguiente fila
+               
+            }
 
-                // Insertar después de "VOUCHER´S:"
-                if (text == "VOUCHER´S:")
-                {
-                    // Fila con una celda en B
-                    var celdaExtra1 = worksheet.Cell(filaBase, "B");
-                    celdaExtra1.Value = "TRAMITES SIN DINERO";
-                    celdaExtra1.Style.Font.Bold = true;
-                    celdaExtra1.Style.Fill.BackgroundColor = XLColor.FromArgb(191, 191, 191);
-                    celdaExtra1.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    filaBase++;
+        
 
-                    if (text == "CHEQUES:")
-                    {
-                        decimal sumaCheques = dailyLogs.ToList().GetSum("C");
-                        celdaValor.Value = sumaCheques;
-                        celdaValor.Style.NumberFormat.Format = "₡ #,##0.00";
-                    }
 
-                    // Dos filas con tres celdas (B, C, D)
-                    var valores = new List<(string B, string C, string D)>
+            // Dos filas con tres celdas (B, C, D)
+            var valores = new List<(string B, string C, string D)>
                      {
                          ("POLIZA", "NOMBRE", "TRAMITE")
                     };
-                    int index = 0;
-                    foreach (var (B, C, D) in valores)
-                    {
-                        worksheet.Cell(filaBase, "B").Value = B;
-                        worksheet.Cell(filaBase, "C").Value = C;
-                        worksheet.Cell(filaBase, "D").Value = D;
 
-                        var range = worksheet.Range($"B{filaBase}:D{filaBase}");
-                        range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                        range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-                        range.Style.Border.OutsideBorderColor = XLColor.Black;
-                        range.Style.Border.InsideBorderColor = XLColor.Black;
+            foreach (var (B, C, D) in valores)
+            {
+                worksheet.Cell(filaBase, "B").Value = B;
+                worksheet.Cell(filaBase, "C").Value = C;
+                worksheet.Cell(filaBase, "D").Value = D;
 
-                        range.Style.Fill.BackgroundColor = XLColor.FromHtml("#b0c4de"); // Fondo azul claro
-                        range.Style.Font.Bold = true; // Negrita
+                var range = worksheet.Range($"B{filaBase}:D{filaBase}");
+                range.ApplyHeaderStyle();
+                range.Style.Fill.BackgroundColor = XLColor.FromHtml("#b0c4de"); // Fondo azul claro
+                range.Style.Font.Bold = true; // Negrita
 
-                        filaBase++;
-                        index++;
-                    }
-                }
+                filaBase++;
             }
 
+            foreach (var item in procedures)
+            {
+                worksheet.Cell(filaBase, "B").Value = item.InsuranceCode;
+                worksheet.Cell(filaBase, "C").Value = item.Insured;
+                worksheet.Cell(filaBase, "D").Value = item.Procedure;
+
+                var range2 = worksheet.Range($"B{filaBase}:D{filaBase}");
+                range2.ApplyHeaderStyle();
+
+                filaBase++;
+            }
 
             #endregion
             #region Auto‑ajuste de ancho de columnas
