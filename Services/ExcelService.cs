@@ -8,7 +8,9 @@ using WebApplication1.Models;
 
 
 namespace WebApplication1.Services
-{ 
+{
+
+
     public static class DailyLogExtensions
     {
         public static decimal GetSum(this List<DailyLog> dailylogs, string initial)
@@ -21,46 +23,55 @@ namespace WebApplication1.Services
 
     public class ExcelService : IExcelService
     {
+        void SetHeader(IXLWorksheet ws, string cell, string value)
+        {
+            var c = ws.Cell(cell);
+            c.Value = value;
+            ApplyHeaderStyle(c);
+        }
+
+        private void ApplyHeaderStyle(IXLCell cell)
+        {
+           // cell.Style.Font.Bold = true;
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            cell.Style.Border.OutsideBorderColor = XLColor.Black;
+
+        }
+
+        private void ApplyHeaderStyle(IXLRange range)
+        {
+           // range.Style.Font.Bold = true;
+            range.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            range.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            range.Style.Border.OutsideBorderColor = XLColor.Black;
+            range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            range.Style.Border.InsideBorderColor = XLColor.Black;
+        
+        }
+
+        void SetMergedHeader(IXLWorksheet ws, string range, string value)
+        {
+            var merged = ws.Range(range).Merge();
+            merged.Value = value;
+            ApplyHeaderStyle(merged);
+        }
+
         public Task<byte[]> ReturnExcelFile()
         {
             // Crea un nuevo libro de Excel en memoria
             using var workbook = new XLWorkbook();
-
             // Agrega una hoja llamada "DailyLogs"
             var worksheet = workbook.Worksheets.Add("DailyLogs");
-
-          
-
             #region Text Principal
-            // Combina las celdas desde la columna E hasta la I en la fila 5 (E5:I5)
-            var mergedRange = worksheet.Range("E5:I5").Merge();
-
-            // Establece el texto dentro de la celda combinada
-            mergedRange.Value = "SERGIO MERCADO GONZALEZ";
-
-            // Aplica un borde negro a todas las celdas del rango combinado
-            mergedRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            mergedRange.Style.Border.OutsideBorderColor = XLColor.Black;
-
-            // Opcional: puedes centrar el texto dentro del rango
-            mergedRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            mergedRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            // SERGIO M G
+            SetMergedHeader(worksheet, "E5:I5", "SERGIO MERCADO GONZALEZ");
             #endregion
 
             #region CONTROL DE TRAMITES PRESENTADOS AL INS  
-            // Combina las celdas desde la columna E hasta la I en la fila 6 (E6:I6)
-            var mergedRange2 = worksheet.Range("E6:I6").Merge();
-
-            // Establece el texto dentro de la celda combinada
-            mergedRange2.Value = "CONTROL DE TRAMITES PRESENTADOS AL INS";
-
-            // Aplica un borde negro a todas las celdas del rango combinado
-            mergedRange2.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            mergedRange2.Style.Border.OutsideBorderColor = XLColor.Black;
-
-            // Opcional: puedes centrar el texto dentro del rango
-            mergedRange2.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            mergedRange2.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            SetMergedHeader(worksheet, "E6:I6", "CONTROL DE TRAMITES PRESENTADOS AL INS");
             #endregion
 
             #region
@@ -87,142 +98,27 @@ namespace WebApplication1.Services
                     .MoveTo(worksheet.Cell("B6"), 0, 0); // Desde la esquina superior de B6
             }
             #endregion
-
-            //
             #region
-            var bitacoraCell = worksheet.Cell("L6");
-            bitacoraCell.Value = "BITACORA";
+            //L6
+           
+            SetHeader(worksheet, "L6", "BITACORA");
 
-            // Bordes negros alrededor de la celda
-            bitacoraCell.Style.Border.TopBorder = XLBorderStyleValues.Thin;
-            bitacoraCell.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
-            bitacoraCell.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
-            bitacoraCell.Style.Border.RightBorder = XLBorderStyleValues.Thin;
-
-            bitacoraCell.Style.Border.TopBorderColor = XLColor.Black;
-            bitacoraCell.Style.Border.BottomBorderColor = XLColor.Black;
-            bitacoraCell.Style.Border.LeftBorderColor = XLColor.Black;
-            bitacoraCell.Style.Border.RightBorderColor = XLColor.Black;
-
-            var cellK6 = worksheet.Cell("K6");
-            cellK6.Value = ""; // Para que la celda exista
-            cellK6.Style.Border.RightBorder = XLBorderStyleValues.Thin;
-            cellK6.Style.Border.RightBorderColor = XLColor.Black;
-
-            // Centrar el texto
-            bitacoraCell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            bitacoraCell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
-            //negrilla del texto
-            bitacoraCell.Style.Font.Bold = true;
-            #endregion
-
-            #region
-            var cellM6 = worksheet.Cell("M6");
-            cellM6.Value = "105-084";
-
-            // Aplicar estilo
-            cellM6.Style.Font.Bold = true;
-            cellM6.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            cellM6.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
-            // Bordes negros
-            cellM6.Style.Border.TopBorder = XLBorderStyleValues.Thin;
-            cellM6.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
-            cellM6.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
-            cellM6.Style.Border.RightBorder = XLBorderStyleValues.Thin;
-
-            cellM6.Style.Border.TopBorderColor = XLColor.Black;
-            cellM6.Style.Border.BottomBorderColor = XLColor.Black;
-            cellM6.Style.Border.LeftBorderColor = XLColor.Black;
-            cellM6.Style.Border.RightBorderColor = XLColor.Black;
-
-            //borde derecho een negro
-
-            var cellN6 = worksheet.Cell("N6");
-            cellN6.Value = ""; // Para que la celda exista
-            cellN6.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
-            cellN6.Style.Border.LeftBorderColor = XLColor.Black;
-
-            #endregion
-
-            #region
+            //M6
+            SetHeader(worksheet, "M6","105-084");
+         
             // Establecer "Fecha" en L7 con estilo y bordes
-            var cellL7 = worksheet.Cell("L7");
-            cellL7.Value = "Fecha";
-
-            // Negrilla
-            cellL7.Style.Font.Bold = true;
-
-            // Centrado horizontal y vertical
-            cellL7.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            cellL7.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
-            // Borde negro completo para L7
-            cellL7.Style.Border.TopBorder = XLBorderStyleValues.Thin;
-            cellL7.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
-            cellL7.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
-            cellL7.Style.Border.RightBorder = XLBorderStyleValues.Thin;
-
-            cellL7.Style.Border.TopBorderColor = XLColor.Black;
-            cellL7.Style.Border.BottomBorderColor = XLColor.Black;
-            cellL7.Style.Border.LeftBorderColor = XLColor.Black;
-            cellL7.Style.Border.RightBorderColor = XLColor.Black;
-
-            // También pintar el borde derecho de K7 (para que se note que está pegada a L7)
-            var cellK7 = worksheet.Cell("K7");
-            cellK7.Style.Border.RightBorder = XLBorderStyleValues.Thin;
-            cellK7.Style.Border.RightBorderColor = XLColor.Black;
-            #endregion
-
-            #region Fecha en M7
+            SetHeader(worksheet, "L7", "Fecha");
 
             // Establecer "28/02/2025" en M7
-            var cellM7 = worksheet.Cell("M7");
-            cellM7.Value = "28/02/2025";
-
-            // Opcional: puedes formatear la celda como fecha
-            cellM7.Style.DateFormat.Format = "dd/MM/yyyy";
-
-            // Negrilla
-            cellM7.Style.Font.Bold = true;
-
-            // Centrado
-            cellM7.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            cellM7.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
-            // Borde negro completo
-            cellM7.Style.Border.TopBorder = XLBorderStyleValues.Thin;
-            cellM7.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
-            cellM7.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
-            cellM7.Style.Border.RightBorder = XLBorderStyleValues.Thin;
-
-            cellM7.Style.Border.TopBorderColor = XLColor.Black;
-            cellM7.Style.Border.BottomBorderColor = XLColor.Black;
-            cellM7.Style.Border.LeftBorderColor = XLColor.Black;
-            cellM7.Style.Border.RightBorderColor = XLColor.Black;
-
-            // Pintar borde izquierdo de la celda N7
-            var cellN7 = worksheet.Cell("N7");
-            cellN7.Value = " "; // Espacio en blanco
-            cellN7.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
-            cellN7.Style.Border.LeftBorderColor = XLColor.Black;
-
+            SetHeader(worksheet, "M7", "28/02/2025");
             #endregion
 
-         
-
             #region
-            // Escribir el texto
+            // Esto no lleva bordes por lo cual no cabe en la funcion
             string texto = "CHEQUE: 'C'; DEPOSITO: 'D'; EFECTIVO: 'E'; SINPE MOVIL: 'S'; TRANSFERENCIA: 'T'; VOUCHER´S: 'V'";
             var rango = worksheet.Range("C9:M9").Merge();
-
-            // Establecer el valor
             rango.Value = texto;
-
-            // Aplicar estilo: negrita y bordes
             rango.Style.Font.Bold = true;
-
             #endregion
 
             #region Colorear encabezado doble fila B10:P11
@@ -232,232 +128,61 @@ namespace WebApplication1.Services
 
             #region 
             //b10
-            
-            var celdaNumero1 = worksheet.Cell("B10");
-            celdaNumero1.Value = "NÚMERO";
-            celdaNumero1.Style.Font.Bold = true;
-            celdaNumero1.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumero1.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumero1.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumero1.Style.Border.OutsideBorderColor = XLColor.Black;
-
+            SetHeader(worksheet, "B10", "NÚMERO");
             //B11
-            var celdaNumero2 = worksheet.Cell("B11");
-            celdaNumero2.Value = "REC / COM";
-            celdaNumero2.Style.Font.Bold = true;
-            celdaNumero2.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumero2.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumero2.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumero2.Style.Border.OutsideBorderColor = XLColor.Black;
-            
-
-            //Formato celda C10
-            var celdaNumero = worksheet.Cell("C10");
-            celdaNumero.Value = "NÚMERO";
-            celdaNumero.Style.Font.Bold = true;
-            celdaNumero.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumero.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumero.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumero.Style.Border.OutsideBorderColor = XLColor.Black;
-
+            SetHeader(worksheet, "B11", "REC / COM");
+            // C10
+            SetHeader(worksheet, "C10", "NÚMERO");
             //c11
-
-            var celdaNumero3 = worksheet.Cell("C11");
-            celdaNumero3.Value = "POLIZA";
-            celdaNumero3.Style.Font.Bold = true;
-            celdaNumero3.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumero3.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumero3.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumero3.Style.Border.OutsideBorderColor = XLColor.Black;
-
+            SetHeader(worksheet, "C11", "POLIZA");
             //D10
-            
-            var celdaNumeroD10 = worksheet.Cell("D10");
-            celdaNumeroD10.Value = "TIPO";
-            celdaNumeroD10.Style.Font.Bold = true;
-            celdaNumeroD10.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumeroD10.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumeroD10.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumeroD10.Style.Border.OutsideBorderColor = XLColor.Black;
-
+            SetHeader(worksheet, "D10", "TIPO");
             // D11
-
-            var celdaNumeroD11 = worksheet.Cell("D11");
-            celdaNumeroD11.Value = "SEGURO";
-            celdaNumeroD11.Style.Font.Bold = true;
-            celdaNumeroD11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumeroD11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumeroD11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumeroD11.Style.Border.OutsideBorderColor = XLColor.Black;
-
+            SetHeader(worksheet, "D11", "SEGURO");
             //E10-F10
-
-            var rangoEF10 = worksheet.Range("E10:F10").Merge();
-            rangoEF10.Value = "VENCIMIENTO";
-            rangoEF10.Style.Font.Bold = true;
-            rangoEF10.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangoEF10.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangoEF10.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangoEF10.Style.Border.InsideBorderColor = XLColor.Black;
-
-            //centrar el textoef10
-            rangoEF10.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangoEF10.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            SetMergedHeader(worksheet, "E10:F10", "VENCIMIENTO");
             #endregion
-
             #region ajuste tamano de columnas
 
             //E11
-
-            var celdaNumeroE10 = worksheet.Cell("E11");
-            celdaNumeroE10.Value = "DE";
-            celdaNumeroE10.Style.Font.Bold = true;
-            celdaNumeroE10.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumeroE10.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumeroE10.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumeroE10.Style.Border.OutsideBorderColor = XLColor.Black;
+            SetHeader(worksheet, "E11", "DE");
 
             //F12
-
-            var celdaNumeroF11 = worksheet.Cell("F11");
-            celdaNumeroF11.Value = "HASTA";
-            celdaNumeroF11.Style.Font.Bold = true;
-            celdaNumeroF11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumeroF11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumeroF11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumeroF11.Style.Border.OutsideBorderColor = XLColor.Black;
+            SetHeader(worksheet, "f11", "HASTA");
 
             //G10-G11
+            SetMergedHeader(worksheet, "G10:G11", "PRIMA");
 
-            var rangog10_11 = worksheet.Range("G10:G11").Merge();
-            rangog10_11.Value = "PRIMA";
-            rangog10_11.Style.Font.Bold = true;
-            rangog10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangog10_11.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangog10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangog10_11.Style.Border.InsideBorderColor = XLColor.Black;
-
-            rangog10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangog10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
-           
             //H10-H11
-
-            var rangoH10_11 = worksheet.Range("H10:H11").Merge();
-            rangoH10_11.Value = " ";
-            rangoH10_11.Style.Font.Bold = true;
-            rangoH10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangoH10_11.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangoH10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangoH10_11.Style.Border.InsideBorderColor = XLColor.Black;
-
-            rangoH10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangoH10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            SetMergedHeader(worksheet, "H10:H11", " ");
 
             //I10 
-
-            var celdaNumeroI10 = worksheet.Cell("I10");
-            celdaNumeroI10.Value = "MEDIO DE";
-            celdaNumeroI10.Style.Font.Bold = true;
-            celdaNumeroI10.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumeroI10.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumeroI10.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumeroI10.Style.Border.OutsideBorderColor = XLColor.Black;
+            SetHeader(worksheet, "I10","MEDIO DE");
 
             //i11
-
-            var celdaNumeroI11 = worksheet.Cell("I11");
-            celdaNumeroI11.Value = "PAGO";
-            celdaNumeroI11.Style.Font.Bold = true;
-            celdaNumeroI11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumeroI11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumeroI11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumeroI11.Style.Border.OutsideBorderColor = XLColor.Black;
+            SetHeader(worksheet, "I11", "PAGO");
 
             //J10
-
-            var celdaNumeroJ10 = worksheet.Cell("J10");
-            celdaNumeroJ10.Value = "TIPO";
-            celdaNumeroJ10.Style.Font.Bold = true;
-            celdaNumeroJ10.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumeroJ10.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumeroJ10.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumeroJ10.Style.Border.OutsideBorderColor = XLColor.Black;
+            SetHeader(worksheet, "J10", "TIPO");
 
             //J11
-
-            var celdaNumeroJ11 = worksheet.Cell("J11");
-            celdaNumeroJ11.Value = "TRANSACCION";
-            celdaNumeroJ11.Style.Font.Bold = true;
-            celdaNumeroJ11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            celdaNumeroJ11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            celdaNumeroJ11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            celdaNumeroJ11.Style.Border.OutsideBorderColor = XLColor.Black;
+            SetHeader(worksheet, "J11", "TRANSACCION");
 
             //K10-K11
-           
-
-            var rangoK10_11 = worksheet.Range("K10:K11").Merge();
-            rangoK10_11.Value = "ASEGURADO";
-            rangoK10_11.Style.Font.Bold = true;
-            rangoK10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangoK10_11.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangoK10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangoK10_11.Style.Border.InsideBorderColor = XLColor.Black;
-
-            rangoK10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangoK10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            SetMergedHeader(worksheet, "K10:K11", "ASEGURADO");
 
             //L10-L11
-
-            var rangoL10_11 = worksheet.Range("L10:L11").Merge();
-            rangoL10_11.Value = "PLACA";
-            rangoL10_11.Style.Font.Bold = true;
-            rangoL10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangoL10_11.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangoL10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangoL10_11.Style.Border.InsideBorderColor = XLColor.Black;
-
-            rangoL10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangoL10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            SetMergedHeader(worksheet, "L10:L11", "PLACA");
 
             //M10-M11
-
-            var rangoM10_11 = worksheet.Range("M10:M11").Merge();
-            rangoM10_11.Value = "CEDULA";
-            rangoM10_11.Style.Font.Bold = true;
-            rangoM10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangoM10_11.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangoM10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangoM10_11.Style.Border.InsideBorderColor = XLColor.Black;
-
-            rangoM10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangoM10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
+            SetMergedHeader(worksheet, "M10:M11", "CEDULA");
 
             //n10-O11
-            var rangoN10_11 = worksheet.Range("N10:N11").Merge();
-            rangoN10_11.Value = "TELEFONOS";
-            rangoN10_11.Style.Font.Bold = true;
-            rangoN10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangoN10_11.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangoN10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangoN10_11.Style.Border.InsideBorderColor = XLColor.Black;
-
-            rangoN10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangoN10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            SetMergedHeader(worksheet, "N10:N11", "TELEFONOS");
 
             //O10-P11
-            var rangoO10_11 = worksheet.Range("O10:O11").Merge();
-            rangoO10_11.Value = "CARGO MANUAL";
-            rangoO10_11.Style.Font.Bold = true;
-            rangoO10_11.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            rangoO10_11.Style.Border.OutsideBorderColor = XLColor.Black;
-            rangoO10_11.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-            rangoO10_11.Style.Border.InsideBorderColor = XLColor.Black;
+            SetMergedHeader(worksheet, "O10:O11", "CARGO MANUAL");
 
-            rangoO10_11.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            rangoO10_11.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
             //
             int filaInicioDaily = 12;
@@ -488,22 +213,16 @@ namespace WebApplication1.Services
 
                 // Aplicar borde negro a toda la fila de la B a la O
                 var range = worksheet.Range($"B{filaInicioDaily}:O{filaInicioDaily}");
-                range.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-                range.Style.Border.OutsideBorderColor = XLColor.Black;
-                range.Style.Border.InsideBorderColor = XLColor.Black;
+                ApplyHeaderStyle(range);
 
                 // Columna G - Monto en colones
                 var celdaColones = worksheet.Cell(filaInicioDaily, "G");
                 celdaColones.Value = item.Amount;
                 celdaColones.Style.NumberFormat.Format = "₡ #,##0.00";
 
-
                 // Acumular el monto
                 totalColones += item.Amount;
                 filaInicioDaily++;
-
-              
             }
 
             // Escribir el total en la celda justo debajo de la última fila en la columna G
@@ -549,8 +268,6 @@ namespace WebApplication1.Services
                 }
 
                 celdaValor.Value = dailyLogs.GetSum(text[..1]);
-
-             
 
                 var rangoFila = worksheet.Range($"B{filaBase}:C{filaBase}");
                 rangoFila.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
@@ -599,7 +316,7 @@ namespace WebApplication1.Services
 
                         if (index == 0) // Primera fila (jon, can, sal)
                         {
-                            range.Style.Fill.BackgroundColor = XLColor.LightBlue; // Fondo azul claro
+                            range.Style.Fill.BackgroundColor = XLColor.FromHtml("#b0c4de"); // Fondo azul claro
                             range.Style.Font.Bold = true; // Negrita
                         }
 
@@ -625,18 +342,6 @@ namespace WebApplication1.Services
 
             // Retornar el contenido del archivo como arreglo de bytes
             return Task.FromResult(stream.ToArray());
-
-
-            //foreach (var item in GetDailyLogs())
-            //{
-
-            //}
-
-            //foreach (var item in GetProcedures())
-            //{
-
-            //}
-
             
         }
 
@@ -674,8 +379,6 @@ namespace WebApplication1.Services
         new DailyLog("487177","0104ACI0275987-00","ESTUDIANTIL",new DateTime(2025,02,28),new DateTime(2026,02,28),20430,"E-EFECTIVO","EMISION","SOLANO GARRO YANCY MAGALLY","110670140",DateTime.Now,"50685751144")
             };
         }
-
-
 
         private List<ProcedureWithoutMoney> GetProcedures()
         {
